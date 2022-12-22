@@ -1,0 +1,10 @@
+#ifndef BATTLECITY_TANKTYPE_H
+#define BATTLECITY_TANKTYPE_H
+
+enum class TankType {
+    PLAYER_TANK,
+    ENEMY_TANK
+};
+
+
+#endif //BATTLECITY_TANKTYPE_H
