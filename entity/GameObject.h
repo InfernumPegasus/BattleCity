@@ -1,7 +1,6 @@
 #ifndef BATTLECITY_GAMEOBJECT_H
 #define BATTLECITY_GAMEOBJECT_H
 
-#include <iostream>
 #include "../Point2D.h"
 
 class GameObject {
