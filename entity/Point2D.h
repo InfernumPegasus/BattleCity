@@ -7,19 +7,22 @@
  */
 class Point2D {
 private:
-    int x;
-    int y;
+    double x_;
+    double y_;
 
 public:
-    Point2D();
-    Point2D(int x, int y);
+    Point2D(double x, double y);
+
     Point2D(const Point2D &other);
 
 public:
-    void SetX(int x);
-    void SetY(int y);
-    [[nodiscard]] int GetX() const;
-    [[nodiscard]] int GetY() const;
+    void SetX(double x);
+
+    void SetY(double y);
+
+    [[nodiscard]] double GetX() const;
+
+    [[nodiscard]] double GetY() const;
 };
 
 

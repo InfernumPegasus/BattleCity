@@ -1,20 +1,24 @@
 #ifndef BATTLECITY_OBSTACLE_H
 #define BATTLECITY_OBSTACLE_H
 
-class Obstacle : protected GameObject {
-protected:
-    const bool tankPassable;
-    const bool projectilePassable;
-    const bool tankVisionDisabling;
+#include "../GameObject.h"
+#include "ObstacleProperties.h"
+#include "../Projectile.h"
 
-protected:
-    Obstacle(const Point2D &position, bool tankPassable, bool projectilePassable, bool tankVisionDisable);
-    Obstacle(const Obstacle &other);
+class Obstacle {
+public:
+    explicit Obstacle(const ObstacleProperties &properties);
+    Obstacle(bool tankPassable, bool projectilePassable, bool tankVisionDisabling);
 
 public:
-    bool TankPassable() const;
-    bool ProjectilePassable() const;
-    bool TankVisionDisabling() const;
+    [[nodiscard]] ObstacleProperties GetProperties() const;
+
+public:
+    virtual void CollideWith(const GameObject &obj) = 0;
+    virtual void CollideWith(const Projectile &projectile) = 0;
+
+private:
+    const ObstacleProperties obstacleProperties_;
 };
 
 

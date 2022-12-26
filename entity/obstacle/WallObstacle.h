@@ -3,20 +3,26 @@
 
 #include "Obstacle.h"
 
-class WallObstacle : protected Obstacle {
-protected:
-    const bool destroyable;
+/*
+ * Interface that describes wall objects
+ */
+class WallObstacle : public Obstacle {
+public:
+    [[nodiscard]] int GetDurability() const;
+
+public:
+    WallObstacle(const ObstacleProperties &properties, int durability) :
+            Obstacle(properties), durability_(durability) {}
+
+    WallObstacle(bool tankPassable, bool projectilePassable, bool tankVisionDisabling, int durability) :
+            Obstacle(tankPassable, projectilePassable, tankVisionDisabling), durability_(durability) {}
 
 protected:
-    bool Destroyable() const;
+    virtual void OnHit() = 0;
+    virtual void OnDestroy() = 0;
 
 protected:
-    WallObstacle(const Obstacle &obstacle, bool destroyable);
-    WallObstacle(bool tankPassable, bool projectilePassable, bool tankVisionDisable, bool destroyable);
-
-protected:
-    virtual void OnHit();
-    virtual void OnDestroy();
+    int durability_;
 };
 
 

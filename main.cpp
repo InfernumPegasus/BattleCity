@@ -7,20 +7,25 @@
  * По возможности использовать наследование.
  */
 
-#include "entity/tank/PlayerTank.h"
-#include "entity/tank/EnemyTank.h"
-#include "Point2D.h"
-#include "entity/obstacle/Obstacle.h"
-#include "entity/Headquarters.h"
-#include "entity/obstacle/IceObstacle.h"
-#include "entity/obstacle/WaterObstacle.h"
-#include "entity/obstacle/WallObstacle.h"
-#include "entity/obstacle/ironWallObstacle.h"
-#include "entity/obstacle/StoneWallObstacle.h"
+#include <iostream>
+#include <vector>
+#include <valarray>
 
 int main() {
-    Headquarters headquarters;
-    Point2D point2D;
-//    PlayerTank tank;
+
+    std::vector<std::array<int, 10>> matrix {
+            {1, 2, 3},
+            {4, 5, 6},
+            {7, 8, 9},
+            {10, 11, 12},
+            {13, 14, 15}
+    };
+
+    auto elem_3_2 = matrix[3][2];
+    std::cout << elem_3_2 << std::endl;
+    matrix.at(1).at(1) = elem_3_2;
+    std::cout << matrix.at(1).at(1) << std::endl;
+    std::cout << matrix.capacity() << " " << std::endl;
+
     return 0;
 }
