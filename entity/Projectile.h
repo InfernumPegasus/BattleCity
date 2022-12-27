@@ -6,11 +6,16 @@
 
 class Projectile : GameObject {
 public:
+    Projectile(const Point2D &pos, Direction direction, int damage) :
+            GameObject(pos), direction_(direction),
+            damage_(damage) {}
+
+public:
     Direction GetDirection() const;
+    int GetDamage() const;
 
 private:
     Direction direction_;
-
     int damage_;
 };
 

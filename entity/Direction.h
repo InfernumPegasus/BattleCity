@@ -2,7 +2,7 @@
 #define BATTLECITY_DIRECTION_H
 
 /*
- * Represents direction_ of Projectile moving direction_
+ * Represents Projectile direction
  */
 enum class Direction {
     UP,

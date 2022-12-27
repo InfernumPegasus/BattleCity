@@ -3,9 +3,11 @@
 
 #include "Tank.h"
 
-class MediumTank : public Tank {
+class MediumTank : public Tank, public GameObject {
 public:
-    MediumTank(double speed, int hp) : Tank(speed, hp) {}
+    MediumTank(const Point2D &position, double speed) :
+            GameObject(position),
+            Tank(speed, MEDIUM_TANK_HP) {}
 
 public:
     void MoveUp() override;
@@ -16,6 +18,9 @@ public:
     void Destroy() override;
     void OnHit() override;
     void Shoot() override;
+
+public:
+    static constexpr int MEDIUM_TANK_HP = 2;
 };
 
 

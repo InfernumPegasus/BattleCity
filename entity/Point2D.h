@@ -1,28 +1,24 @@
 #ifndef BATTLECITY_POINT2D_H
 #define BATTLECITY_POINT2D_H
 
-
 /*
  * Class that describes position of the object in 2D
  */
 class Point2D {
-private:
-    double x_;
-    double y_;
-
 public:
-    Point2D(double x, double y);
-
+    Point2D(int x, int y);
     Point2D(const Point2D &other);
 
 public:
-    void SetX(double x);
+    void SetX(int x);
+    void SetY(int y);
 
-    void SetY(double y);
+    [[nodiscard]] int GetX() const;
+    [[nodiscard]] int GetY() const;
 
-    [[nodiscard]] double GetX() const;
-
-    [[nodiscard]] double GetY() const;
+private:
+    int x_;
+    int y_;
 };
 
 

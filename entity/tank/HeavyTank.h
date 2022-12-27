@@ -3,19 +3,24 @@
 
 #include "Tank.h"
 
-class HeavyTank : public Tank {
+class HeavyTank : public Tank, public GameObject {
 public:
-    HeavyTank(double speed, int hp) : Tank(speed, hp) {}
+    HeavyTank(const Point2D &position, double speed) :
+            GameObject(position),
+            Tank(speed, HEAVY_TANK_HP) {}
 
 public:
-    void MoveUp() override {}
-    void MoveDown() override {}
-    void MoveLeft() override {}
-    void MoveRight() override {}
+    void MoveUp() override;
+    void MoveDown() override;
+    void MoveLeft() override;
+    void MoveRight() override;
 
-    void Destroy() override {}
-    void OnHit() override {}
-    void Shoot() override {}
+    void Destroy() override;
+    void OnHit() override;
+    void Shoot() override;
+
+public:
+    static constexpr int HEAVY_TANK_HP = 3;
 };
 
 

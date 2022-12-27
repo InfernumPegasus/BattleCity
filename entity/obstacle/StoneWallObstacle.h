@@ -11,7 +11,6 @@ public:
      * 1) Tank cannot pass it
      * 2) Projectile cannot pass it
      * 3) It reduces visibility
-     * 4) It can be destroyed
      */
     explicit StoneWallObstacle(const Point2D &position) :
             GameObject(position),

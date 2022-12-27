@@ -11,7 +11,6 @@ public:
      * 1) Tank cannot pass it
      * 2) Projectile cannot pass it
      * 3) It reduces visibility
-     * 4) It cannot be destroyed
      */
     explicit IronWallObstacle(const Point2D &position) :
             GameObject(position),
