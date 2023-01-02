@@ -3,8 +3,6 @@
 
 #include <vector>
 #include <array>
-#include <valarray>
-#include <variant>
 #include "../entity/GameObject.h"
 #include "../entity/tank/Tank.h"
 #include "../entity/obstacle/Obstacle.h"
