@@ -1,30 +1,49 @@
+#include <iostream>
+#include "message/FieldMessage.h"
+
 /*
- * 3. Используя средства языка описать объектную модель игры BattleCity.
- * (Танк, Снаряд, Штаб, Препятствие: {Лед, Вода, Стена: {Железная, Каменная}}.
- * Реализовать pure abstract классы (интерфейсы, описание методов без реализации а данных).
- * Описания в отдельных *.h файлах с защитой от включения (pragma or #define).
- * По возможности использовать наследование.
+    Разработать класс сообщения, которое представляет из себя набор полей.
+    Поле может быть строковым(ASCII) или целочисленным(32 бита).
+    Набор полей задается вложенным в класс сообщения enum class
+    (придумать самостоятельно ориентируясь на параметры которыми могут быть описаны объекты в игре Battle City, например:
+    скорость, направление, прочность, позиция и т.п.).
+
+    Каждое сообщение может содержать произвольное количество полей(до 64)
+    При этом обязательны:
+    одно числовое поле messageSize - хранит размер сообщения
+    одно строковое поле corrId - уникальный идентификатор сообщения
  */
 
-#include <iostream>
-#include <vector>
-#include <valarray>
-
 int main() {
+    using Field = FieldMessage::Field;
 
-    std::vector<std::array<int, 10>> matrix {
-            {1, 2, 3},
-            {4, 5, 6},
-            {7, 8, 9},
-            {10, 11, 12},
-            {13, 14, 15}
-    };
+    try {
+        FieldMessage message1;
 
-    auto elem_3_2 = matrix[3][2];
-    std::cout << elem_3_2 << std::endl;
-    matrix.at(1).at(1) = elem_3_2;
-    std::cout << matrix.at(1).at(1) << std::endl;
-    std::cout << matrix.capacity() << " " << std::endl;
+        message1.SetIntField(Field::TankSpeed, 10);
+//        message1.SetIntField(Field::TankHp, 1);
+        message1.SetIntField(Field::ObstacleDurability, 3);
+        message1.SetStringField(Field::Direction, "UP");
+        message1.SetStringField(Field::PlayerName, "Vladimir");
+        message1.SetStringField(Field::Position, "22,5");
+        message1.Print();
+
+        std::cout << "Msg size | Bit mask | Type | Length(string only) | Value |" << std::endl;
+        auto c = message1.Serialize();
+        std::cout << c << std::endl;
+
+        message1.DeleteField(Field::TankHp);
+        auto d = message1.GetIntField(Field::TankHp);
+        std::cout << d << std::endl;
+    } catch (std::exception &e) {
+        std::cout << e.what() << std::endl;
+    }
+
+    FieldMessage message2;
+    std::cout << "Id: " << message2.GetId() << " MessageIdNumber: " << message2.GetMessageIdNumber() << std::endl;
+
+    FieldMessage message3;
+    std::cout << "Id: " << message3.GetId() << " MessageIdNumber: " << message3.GetMessageIdNumber() << std::endl;
 
     return 0;
 }
