@@ -6,6 +6,7 @@
 #include <string>
 #include <iostream>
 #include <bitset>
+#include <vector>
 
 class FieldMessage {
 
@@ -57,6 +58,8 @@ public:
 
     [[nodiscard]] std::string Serialize() const;
 
+    static FieldMessage Deserialize(const std::string_view &serialized);
+
 private:
     static std::bitset<8> FieldToBitset(Field field);
 
@@ -70,6 +73,8 @@ private:
     static constexpr int MAX_FIELDS = 64;
     static constexpr int UINT64_TYPE_CODE = 0;
     static constexpr int STRING_TYPE_CODE = 127;
+
+    const std::array<Field, 3> STRING_FIELDS { Field::PlayerName, Field::Position, Field::Direction };
 
     // Map of fields
     std::map<Field, SupportedType> fields_;

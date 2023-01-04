@@ -1,4 +1,5 @@
 #include "FieldMessage.h"
+#include <cmath>
 
 void FieldMessage::SetIntField(FieldMessage::Field field, uint64_t value) {
     // If field is not found
@@ -15,6 +16,10 @@ void FieldMessage::SetIntField(FieldMessage::Field field, uint64_t value) {
 }
 
 void FieldMessage::SetStringField(FieldMessage::Field field, std::string value) {
+    if (value.length() > 99) {
+        throw std::logic_error("Value length cannot be more than 99!");
+    }
+
     // If field is not found
     if (!Has(field) &&
         (field == Field::PlayerName ||
@@ -81,33 +86,30 @@ FieldMessage::FieldMessage() : messageSize_(0) {
 }
 
 std::string FieldMessage::Serialize() const {
-    std::bitset<8> messageSizeBitset(messageSize_);
     std::string serialized;
-
-    constexpr auto delimiter = "@";
+    std::bitset<8> messageSizeBitset(messageSize_);
     auto allFieldInBitset = AllFieldsToBitset();
 
     serialized
-            .append(delimiter)
             .append(messageSizeBitset.to_string())
-            .append(delimiter)
             .append(allFieldInBitset.to_string());
 
     auto fieldsAndValueTypes = GetAllFieldsWithTypes();
-    for (const auto & fieldAndValue : fieldsAndValueTypes) {
+    for (const auto &fieldAndValue: fieldsAndValueTypes) {
         auto type = fieldAndValue.second;
-        serialized.append(delimiter).append(std::to_string(type));
+        serialized.append(std::to_string(type));
         // If uint64 type
         if (type == UINT64_TYPE_CODE) {
             serialized.append(std::to_string(get<std::uint64_t>(fields_.find(fieldAndValue.first)->second)));
         }
-            // If std::string type
+        // If std::string type
         else if (type == STRING_TYPE_CODE) {
             auto strValue = get<std::string>(fields_.find(fieldAndValue.first)->second);
-            serialized.append(std::to_string(strValue.size())).append(strValue);
+            auto length = strValue.length();
+            auto lengthStr = length < 10 ? "0" + std::to_string(length) : std::to_string(length);
+            serialized.append(lengthStr).append(strValue);
         }
     }
-    serialized.append(delimiter);
     return serialized;
 }
 
@@ -138,8 +140,54 @@ int FieldMessage::GetFieldValueType(FieldMessage::Field field) const {
 
 std::map<FieldMessage::Field, int> FieldMessage::GetAllFieldsWithTypes() const {
     std::map<Field, int> field_and_type;
-    for (const auto & pair : fields_)
+    for (const auto &pair: fields_)
         field_and_type.emplace(pair.first, GetFieldValueType(pair.first));
 
     return field_and_type;
+}
+
+std::bitset<8> StringToBits(const std::string_view &string) {
+    std::bitset<8> bits(string.data());
+    return bits;
+}
+
+FieldMessage FieldMessage::Deserialize(const std::string_view &serialized) {
+    FieldMessage message;
+    std::bitset<8> msgSize(std::string_view{serialized.substr(0, 7)}.data());
+    auto size = msgSize.to_ullong();
+    std::bitset<8> bitMask(std::string_view{serialized.substr(8, 15)}.data());
+
+    std::cout << "Size from string (bin): " << msgSize << std::endl;
+    std::cout << "Bitmask: " << bitMask << std::endl;
+
+    for (auto pos {0}; pos < bitMask.size(); pos++) {
+//        auto field = static_cast<Field>(pos);
+        if (bitMask.test(pos)) {
+            auto bitValue = static_cast<uint64_t>(pow(2, pos));
+            auto field = static_cast<Field>(bitValue);
+
+            switch (field) {
+                case Field::PlayerName:
+                case Field::Position:
+                case Field::Direction:
+                    message.SetStringField(field, "value-" + std::to_string(pos));
+                    std::cout << "SetStringField to: " << pos << std::endl;
+                    break;
+
+                case Field::TankSpeed:
+                case Field::TankHp:
+                case Field::ObstacleDurability:
+                    message.SetIntField(field, pos);
+                    std::cout << "SetIntField to: " << pos << std::endl;
+                    break;
+            }
+        }
+    }
+
+    std::cout << "Size from string: " << size << " , actual size: " << message.GetMessageSize() << std::endl;
+    if (message.GetMessageSize() != size) {
+        throw std::range_error("Message sizes are not equal!");
+    }
+
+    return message;
 }
