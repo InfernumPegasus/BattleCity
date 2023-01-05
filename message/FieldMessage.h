@@ -9,10 +9,6 @@
 #include <vector>
 
 class FieldMessage {
-
-private:
-    using SupportedType = std::variant<uint64_t, std::string>;
-
 public:
     // Defines field attributes
     enum class Field : std::uint64_t {
@@ -24,23 +20,18 @@ public:
         ObstacleDurability  = 0B00100000        // Only std::uint64_t
     };
 
-    [[maybe_unused]]
-    friend Field operator|(const Field &first, const Field &second) {
-        return static_cast<Field>(
-                static_cast<std::underlying_type_t<Field>>(std::to_underlying(first)) |
-                static_cast<std::underlying_type_t<Field>>(std::to_underlying(second)));
-    }
+private:
+    using SupportedType = std::variant<int32_t, std::string>;
+    using BitMask = std::underlying_type_t<Field>;
 
 public:
     FieldMessage();
 
-public:
+    void SetIntField(Field field, int32_t value);
 
-    void SetIntField(Field field, uint64_t value);
+    void SetStringField(Field field, const std::string &value);
 
-    void SetStringField(Field field, std::string value);
-
-    [[nodiscard]] uint64_t GetIntField(Field field) const;
+    [[nodiscard]] int32_t GetIntField(Field field) const;
 
     [[nodiscard]] std::string GetStringField(Field field) const;
 
@@ -54,33 +45,51 @@ public:
 
     [[nodiscard]] std::string GetId() const;
 
-    [[nodiscard]] std::int64_t GetMessageSize() const;
+    [[nodiscard]] std::uint64_t GetMessageSize() const;
+
+    [[nodiscard]] BitMask GetBitmask() const;
+
+    static bool IsStringField(Field field);
 
     [[nodiscard]] std::string Serialize() const;
 
     static FieldMessage Deserialize(const std::string_view &serialized);
 
 private:
-    static std::bitset<8> FieldToBitset(Field field);
 
-    [[nodiscard]] std::bitset<8> AllFieldsToBitset() const;
+    [[nodiscard]] bool GetBitmaskValue(std::uint64_t bit) const {
+        return bitMask_ & bit;
+    }
 
-    [[nodiscard]] int GetFieldValueType(Field field) const;
+    [[nodiscard]] bool GetBitmaskValue(Field bit) const {
+        return GetBitmaskValue(static_cast<std::underlying_type_t<Field>>(bit));
+    }
 
-    [[nodiscard]] std::map<Field, int> GetAllFieldsWithTypes() const;
+    void SetBitmaskField(std::uint64_t bit) {
+        bitMask_ |= bit;
+    }
+
+    void SetBitmaskField(Field bit) {
+        SetBitmaskField(static_cast<std::underlying_type_t<Field>>(bit));
+    }
+
+public:
+    static constexpr auto kHEADER_SIZE = 16;            // MsgSize + Bitmask length
+    static constexpr auto kINT_FIELD_SIZE = 5;          // 1 byte for type, 4 bytes for value
+    static constexpr auto kSTRING_HEADER_SIZE = 3;      // 1 byte for type, 2 bytes for length (also need string length)
 
 private:
-    static constexpr int MAX_FIELDS = 64;
-    static constexpr int UINT64_TYPE_CODE = 0;
+    static constexpr int INT32_TYPE_CODE = 0;
     static constexpr int STRING_TYPE_CODE = 127;
-
-    const std::array<Field, 3> STRING_FIELDS { Field::PlayerName, Field::Position, Field::Direction };
 
     // Map of fields
     std::map<Field, SupportedType> fields_;
 
+    // Bit mask for fields
+    BitMask bitMask_ = 0b00'000'000;
+
     // Defines Field quantity (up to 64 in one message)
-    std::int64_t messageSize_;
+    std::uint64_t messageSize_;
 
     // Unique message id
     std::string id_;

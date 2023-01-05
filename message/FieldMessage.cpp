@@ -1,39 +1,37 @@
 #include "FieldMessage.h"
 #include <cmath>
 
-void FieldMessage::SetIntField(FieldMessage::Field field, uint64_t value) {
+void FieldMessage::SetIntField(FieldMessage::Field field, int32_t value) {
     // If field is not found
     if (!Has(field) &&
         field != Field::PlayerName &&
         field != Field::Position &&
         field != Field::Direction &&
-        messageSize_ < MAX_FIELDS) {
+        !GetBitmaskValue(field)) {
         fields_.emplace(field, value);
-        messageSize_++;
+        SetBitmaskField(field);
+        messageSize_ += kINT_FIELD_SIZE;
     } else {
         throw std::logic_error("Cannot set value!");
     }
 }
 
-void FieldMessage::SetStringField(FieldMessage::Field field, std::string value) {
-    if (value.length() > 99) {
-        throw std::logic_error("Value length cannot be more than 99!");
-    }
-
+void FieldMessage::SetStringField(FieldMessage::Field field, const std::string &value) {
     // If field is not found
     if (!Has(field) &&
         (field == Field::PlayerName ||
          field == Field::Position ||
          field == Field::Direction) &&
-        messageSize_ < MAX_FIELDS) {
+        !GetBitmaskValue(field)) {
         fields_.emplace(field, value);
-        messageSize_++;
+        SetBitmaskField(field);
+        messageSize_ += kSTRING_HEADER_SIZE + value.length();
     } else {
         throw std::logic_error("Cannot set value!");
     }
 }
 
-uint64_t FieldMessage::GetIntField(FieldMessage::Field field) const {
+int32_t FieldMessage::GetIntField(FieldMessage::Field field) const {
     if (!fields_.contains(field))
         throw std::logic_error("No such field!");
     auto found = fields_.find(field);
@@ -41,7 +39,7 @@ uint64_t FieldMessage::GetIntField(FieldMessage::Field field) const {
     if (std::holds_alternative<std::string>(found->second))
         throw std::logic_error("Wrong type!");
 
-    return std::get<uint64_t>(found->second);
+    return std::get<int32_t>(found->second);
 }
 
 std::string FieldMessage::GetStringField(FieldMessage::Field field) const {
@@ -49,7 +47,7 @@ std::string FieldMessage::GetStringField(FieldMessage::Field field) const {
         throw std::logic_error("No such field!");
     auto found = fields_.find(field);
 
-    if (std::holds_alternative<uint64_t>(found->second)) {
+    if (std::holds_alternative<int32_t>(found->second)) {
         throw std::logic_error("Wrong type!");
     }
     return std::get<std::string>(found->second);
@@ -60,16 +58,28 @@ bool FieldMessage::Has(FieldMessage::Field field) const {
 }
 
 void FieldMessage::DeleteField(FieldMessage::Field field) {
-    if (fields_.contains(field)) {
+    auto found = fields_.find(field);
+    if (found != fields_.end()) {
+        if (IsStringField(field)) {
+            messageSize_ -= (kSTRING_HEADER_SIZE + get<std::string>(found->second).size());
+        } else {
+            messageSize_ -= kINT_FIELD_SIZE;
+        }
         fields_.erase(field);
-        messageSize_--;
     }
+}
+
+std::ostream &operator<<(std::ostream &os, std::variant<int32_t, std::string> const &v) {
+    std::visit([&os](auto const &x) { os << x; }, v);
+    return os;
 }
 
 void FieldMessage::Print() const {
     for (const auto &item: fields_) {
-        std::cout << "Attribute: " << static_cast<std::uint64_t>(item.first) << " | Value type: "
-                  << (item.second.index() == 0 ? "uint_64_t" : "string") << std::endl;
+        std::string typeStr = item.second.index() == 0 ? "uint_64_t" : "string";
+        std::cout << "Attribute: " << static_cast<std::uint64_t>(item.first)
+                  << " | Value type: " << typeStr
+                  << " | Value: " << item.second << std::endl;
     }
 }
 
@@ -77,9 +87,9 @@ std::int64_t FieldMessage::GetMessageIdNumber() const { return idNumber_; }
 
 std::string FieldMessage::GetId() const { return id_; }
 
-std::int64_t FieldMessage::GetMessageSize() const { return messageSize_; }
+std::uint64_t FieldMessage::GetMessageSize() const { return messageSize_; }
 
-FieldMessage::FieldMessage() : messageSize_(0) {
+FieldMessage::FieldMessage() : messageSize_(kHEADER_SIZE) {
     static std::int64_t idNumber;
     idNumber_ = idNumber;
     id_ = "message-" + std::to_string(idNumber++);
@@ -87,53 +97,46 @@ FieldMessage::FieldMessage() : messageSize_(0) {
 
 std::string FieldMessage::Serialize() const {
     std::string serialized;
-    std::bitset<8> messageSizeBitset(messageSize_);
-    auto allFieldInBitset = AllFieldsToBitset();
+    std::bitset<kHEADER_SIZE / 2> size(messageSize_);
+    std::bitset<kHEADER_SIZE / 2> mask(bitMask_);
 
+//    std::cout << "size: " << size.to_string() << " mask: " << mask.to_string() << std::endl;
     serialized
-            .append(messageSizeBitset.to_string())
-            .append(allFieldInBitset.to_string());
+    .append(size.to_string())
+//    .append("[")
+    .append(mask.to_string());
+//    .append("]");
 
-    auto fieldsAndValueTypes = GetAllFieldsWithTypes();
-    for (const auto &fieldAndValue: fieldsAndValueTypes) {
-        auto type = fieldAndValue.second;
-        serialized.append(std::to_string(type));
-        // If uint64 type
-        if (type == UINT64_TYPE_CODE) {
-            serialized.append(std::to_string(get<std::uint64_t>(fields_.find(fieldAndValue.first)->second)));
+    for (const auto &pair : fields_) {
+//        serialized.append("[");
+        if (IsStringField(pair.first)) {
+            std::bitset<8> t(STRING_TYPE_CODE);
+            auto typeStr = t.to_string();
+            auto value = get<std::string>(pair.second);
+            std::bitset<16> length(value.length());
+
+            serialized
+            .append(typeStr)
+//            .append(" ")
+            .append(length.to_string())
+//            .append(" ")
+            .append(value);
+        } else {
+            std::bitset<8> t(INT32_TYPE_CODE);
+            auto typeStr = t.to_string();
+            std::bitset<32> value(get<std::int32_t>(pair.second));
+            serialized
+            .append(typeStr)
+//            .append(" ")
+            .append(value.to_string());
         }
-        // If std::string type
-        else if (type == STRING_TYPE_CODE) {
-            auto strValue = get<std::string>(fields_.find(fieldAndValue.first)->second);
-            auto length = strValue.length();
-            auto lengthStr = length < 10 ? "0" + std::to_string(length) : std::to_string(length);
-            serialized.append(lengthStr).append(strValue);
-        }
+//        serialized.append("]");
     }
+//    std::cout << "Length: " << serialized.length() << ", length % 8: " << serialized.length() % 8 << std::endl;
     return serialized;
 }
 
-std::bitset<8> FieldMessage::FieldToBitset(FieldMessage::Field field) {
-    std::bitset<8> bitset(static_cast<uint64_t>(field));
-    return bitset;
-}
 
-std::bitset<8> FieldMessage::AllFieldsToBitset() const {
-    std::bitset<8> bitset;
-    for (const auto &item: fields_)
-        bitset.operator^=(FieldToBitset(item.first));
-
-    return bitset;
-}
-
-int FieldMessage::GetFieldValueType(FieldMessage::Field field) const {
-    auto found = fields_.find(field);
-    if (found == fields_.end()) {
-        throw std::runtime_error("Cannot find field!");
-    } else if (holds_alternative<std::string>(found->second)) {
-        return 127;
-    } else if (holds_alternative<std::uint64_t>(found->second)) {
-        return 0;
     }
     throw std::runtime_error("Cannot identify field value type!");
 }
@@ -190,4 +193,8 @@ FieldMessage FieldMessage::Deserialize(const std::string_view &serialized) {
     }
 
     return message;
+}bool FieldMessage::IsStringField(FieldMessage::Field field) {
+    return field == Field::PlayerName || field == Field::Position || field == Field::Direction;
 }
+
+FieldMessage::BitMask FieldMessage::GetBitmask() const  { return bitMask_; }

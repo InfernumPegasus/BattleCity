@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cassert>
 #include "message/FieldMessage.h"
 
 /*
@@ -20,33 +21,44 @@ int main() {
     try {
         FieldMessage message1;
 
-        message1.SetIntField(Field::TankSpeed, 10);
-//        message1.SetIntField(Field::TankHp, 1);
-        message1.SetIntField(Field::ObstacleDurability, 3);
-//        message1.SetStringField(Field::Direction, " UP ");
-        message1.SetStringField(Field::PlayerName, " Vladimir ");
-        message1.SetStringField(Field::Position, " sad ");
+        std::string_view playerName = "Vladimir";
+        std::string_view position = "22;58";
+
+        message1.SetIntField(Field::TankSpeed, 255);
+        message1.SetIntField(Field::TankHp, 999);
+//        message1.SetIntField(Field::ObstacleDurability, 3);
+        message1.SetStringField(Field::PlayerName, playerName.data());
+        message1.SetStringField(Field::Position, position.data());
         message1.Print();
 
-        std::cout << "Msg size | Bit mask | Type | Length(string only) | Value |" << std::endl;
         auto c = message1.Serialize();
         std::cout << c << std::endl;
 
-        auto d = FieldMessage::Deserialize(c);
-        d.Print();
+        assert(message1.GetMessageSize() == FieldMessage::kHEADER_SIZE +
+                                            2*FieldMessage::kINT_FIELD_SIZE +
+                                            2*FieldMessage::kSTRING_HEADER_SIZE +
+                                            playerName.length() +
+                                            position.length());
 
-//        message1.DeleteField(Field::TankHp);
-//        auto d = message1.GetIntField(Field::TankHp);
-//        std::cout << d << std::endl;
+
+        message1.DeleteField(Field::Position);
+        assert(message1.GetMessageSize() == FieldMessage::kHEADER_SIZE +
+                                            2*FieldMessage::kINT_FIELD_SIZE +
+                                            1*FieldMessage::kSTRING_HEADER_SIZE +
+                                            playerName.length());
+
+        message1.DeleteField(Field::TankHp);
+        auto d = message1.GetIntField(Field::TankHp);
+        std::cout << d << std::endl;
     } catch (std::exception &e) {
         std::cout << e.what() << std::endl;
     }
 
-//    FieldMessage message2;
-//    std::cout << "Id: " << message2.GetId() << " MessageIdNumber: " << message2.GetMessageIdNumber() << std::endl;
-//
-//    FieldMessage message3;
-//    std::cout << "Id: " << message3.GetId() << " MessageIdNumber: " << message3.GetMessageIdNumber() << std::endl;
+    FieldMessage message2;
+    std::cout << "Id: " << message2.GetId() << " MessageIdNumber: " << message2.GetMessageIdNumber() << std::endl;
+
+    FieldMessage message3;
+    std::cout << "Id: " << message3.GetId() << " MessageIdNumber: " << message3.GetMessageIdNumber() << std::endl;
 
     return 0;
 }
