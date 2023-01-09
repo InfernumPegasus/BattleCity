@@ -1,3 +1,5 @@
+#include <cmath>
+#include <sstream>
 #include "FieldMessageSerializer.h"
 
 std::string FieldMessageSerializer::Serialize(const FieldMessage &message) {
@@ -51,6 +53,7 @@ FieldMessage FieldMessageSerializer::Deserialize(const std::string &serialized) 
                 std::string value(str);
 
                 message.SetStringField(field, value.substr(0, length));
+                delete[] str;
             } else {
                 int32_t value;
                 iss.read((char *)&value, sizeof(value));

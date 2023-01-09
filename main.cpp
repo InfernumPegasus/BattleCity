@@ -1,4 +1,5 @@
 #include <cassert>
+#include <iostream>
 #include "message/FieldMessage.h"
 #include "message/FieldMessageSerializer.h"
 
@@ -40,18 +41,18 @@ int main() {
         assert(message.GetId() != deserialized.GetId());
     }
     {
-        assert(message.GetMessageSize() == FieldMessageSerializer::kHEADER_SIZE +
-                                           3 * FieldMessageSerializer::kINT_FIELD_SIZE +
-                                           3 * FieldMessageSerializer::kSTRING_HEADER_SIZE +
+        assert(message.GetMessageSize() == FieldMessage::kHEADER_SIZE +
+                                           3 * FieldMessage::kINT_FIELD_SIZE +
+                                           3 * FieldMessage::kSTRING_HEADER_SIZE +
                                            playerName.length() +
                                            position.length() +
                                            direction.length());
     }
     {
         message.DeleteField(Field::Position);
-        assert(message.GetMessageSize() == FieldMessageSerializer::kHEADER_SIZE +
-                                           3 * FieldMessageSerializer::kINT_FIELD_SIZE +
-                                           2 * FieldMessageSerializer::kSTRING_HEADER_SIZE +
+        assert(message.GetMessageSize() == FieldMessage::kHEADER_SIZE +
+                                           3 * FieldMessage::kINT_FIELD_SIZE +
+                                           2 * FieldMessage::kSTRING_HEADER_SIZE +
                                            playerName.length() +
                                            direction.length());
     }
@@ -60,5 +61,6 @@ int main() {
         assert(!message.Has(Field::TankHp));
     }
 
+    std::cout << "All tests passed!" << std::endl;
     return 0;
 }

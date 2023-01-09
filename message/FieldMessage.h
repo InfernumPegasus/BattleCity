@@ -20,6 +20,10 @@ public:
     using BitMask = std::underlying_type_t<Field>;
     using SupportedType = std::variant<int32_t, std::string>;
 
+    static constexpr auto kHEADER_SIZE = 16;        // MsgSize + Bitmask length
+    static constexpr auto kINT_FIELD_SIZE = 5;      // 1 byte for type, 4 bytes for value
+    static constexpr auto kSTRING_HEADER_SIZE = 3;  // 1 byte for type, 2 bytes for length (also need string length)
+
 public:
     FieldMessage();
     explicit FieldMessage(BitMask bitMask);
@@ -73,9 +77,6 @@ private:
 
     // Unique message id
     std::string id_;
-
-    // ID number which is used for generating id
-    std::int64_t idNumber_;
 };
 
 

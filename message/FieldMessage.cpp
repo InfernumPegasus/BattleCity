@@ -1,5 +1,5 @@
+#include <stdexcept>
 #include "FieldMessage.h"
-#include "FieldMessageSerializer.h"
 
 void FieldMessage::SetIntField(FieldMessage::Field field, int32_t value) {
     // If field is not found
@@ -7,7 +7,7 @@ void FieldMessage::SetIntField(FieldMessage::Field field, int32_t value) {
         !IsStringField(field)) {
         fields_.emplace(field, value);
         SetBitmaskField(field);
-        messageSize_ += FieldMessageSerializer::kINT_FIELD_SIZE;
+        messageSize_ += FieldMessage::kINT_FIELD_SIZE;
     } else {
         throw std::logic_error("Cannot set value!");
     }
@@ -19,7 +19,7 @@ void FieldMessage::SetStringField(FieldMessage::Field field, const std::string &
         IsStringField(field)) {
         fields_.emplace(field, value);
         SetBitmaskField(field);
-        messageSize_ += FieldMessageSerializer::kSTRING_HEADER_SIZE + value.length();
+        messageSize_ += FieldMessage::kSTRING_HEADER_SIZE + value.length();
     } else {
         throw std::logic_error("Cannot set value!");
     }
@@ -55,9 +55,9 @@ void FieldMessage::DeleteField(FieldMessage::Field field) {
     auto found = fields_.find(field);
     if (found != fields_.end()) {
         if (IsStringField(field)) {
-            messageSize_ -= (FieldMessageSerializer::kSTRING_HEADER_SIZE + get<std::string>(found->second).size());
+            messageSize_ -= (FieldMessage::kSTRING_HEADER_SIZE + get<std::string>(found->second).size());
         } else {
-            messageSize_ -= FieldMessageSerializer::kINT_FIELD_SIZE;
+            messageSize_ -= FieldMessage::kINT_FIELD_SIZE;
         }
         fields_.erase(field);
     }
@@ -65,9 +65,8 @@ void FieldMessage::DeleteField(FieldMessage::Field field) {
 
 std::uint64_t FieldMessage::GetMessageSize() const { return messageSize_; }
 
-FieldMessage::FieldMessage() : messageSize_(FieldMessageSerializer::kHEADER_SIZE) {
+FieldMessage::FieldMessage() : messageSize_(FieldMessage::kHEADER_SIZE) {
     static std::int64_t idNumber;
-    idNumber_ = idNumber;
     id_ = "message-" + std::to_string(idNumber++);
 }
 
@@ -84,7 +83,7 @@ bool FieldMessage::IsStringField(FieldMessage::BitMask mask) {
     return field == Field::PlayerName || field == Field::Position || field == Field::Direction;
 }
 
-FieldMessage::BitMask FieldMessage::GetBitmask() const  { return bitMask_; }
+FieldMessage::BitMask FieldMessage::GetBitmask() const { return bitMask_; }
 
 std::map<FieldMessage::Field, FieldMessage::SupportedType> FieldMessage::GetFields() const { return fields_; }
 
