@@ -1,6 +1,6 @@
-#include <iostream>
 #include <cassert>
 #include "message/FieldMessage.h"
+#include "message/FieldMessageSerializer.h"
 
 /*
     Разработать класс сообщения, которое представляет из себя набор полей.
@@ -18,47 +18,47 @@
 int main() {
     using Field = FieldMessage::Field;
 
-    try {
-        FieldMessage message1;
+    FieldMessage message;
 
-        std::string_view playerName = "Vladimir";
-        std::string_view position = "22;58";
+    std::string_view playerName = "Vladimir";
+    std::string_view position = "22;58";
+    std::string_view direction = "DOWN!";
 
-        message1.SetIntField(Field::TankSpeed, 255);
-        message1.SetIntField(Field::TankHp, 999);
-//        message1.SetIntField(Field::ObstacleDurability, 3);
-        message1.SetStringField(Field::PlayerName, playerName.data());
-        message1.SetStringField(Field::Position, position.data());
-        message1.Print();
+    message.SetIntField(Field::TankSpeed, 255);
+    message.SetIntField(Field::TankHp, 999);
+    message.SetIntField(Field::ObstacleDurability, 3);
+    message.SetStringField(Field::PlayerName, playerName.data());
+    message.SetStringField(Field::Position, position.data());
+    message.SetStringField(Field::Direction, direction.data());
 
-        auto c = message1.Serialize();
-        std::cout << c << std::endl;
+    {
+        auto serialized = FieldMessageSerializer::Serialize(message);
+        auto deserialized = FieldMessageSerializer::Deserialize(serialized);
 
-        assert(message1.GetMessageSize() == FieldMessage::kHEADER_SIZE +
-                                            2*FieldMessage::kINT_FIELD_SIZE +
-                                            2*FieldMessage::kSTRING_HEADER_SIZE +
-                                            playerName.length() +
-                                            position.length());
+        assert(message == deserialized);
 
-
-        message1.DeleteField(Field::Position);
-        assert(message1.GetMessageSize() == FieldMessage::kHEADER_SIZE +
-                                            2*FieldMessage::kINT_FIELD_SIZE +
-                                            1*FieldMessage::kSTRING_HEADER_SIZE +
-                                            playerName.length());
-
-        message1.DeleteField(Field::TankHp);
-        auto d = message1.GetIntField(Field::TankHp);
-        std::cout << d << std::endl;
-    } catch (std::exception &e) {
-        std::cout << e.what() << std::endl;
+        assert(message.GetId() != deserialized.GetId());
     }
-
-    FieldMessage message2;
-    std::cout << "Id: " << message2.GetId() << " MessageIdNumber: " << message2.GetMessageIdNumber() << std::endl;
-
-    FieldMessage message3;
-    std::cout << "Id: " << message3.GetId() << " MessageIdNumber: " << message3.GetMessageIdNumber() << std::endl;
+    {
+        assert(message.GetMessageSize() == FieldMessageSerializer::kHEADER_SIZE +
+                                           3 * FieldMessageSerializer::kINT_FIELD_SIZE +
+                                           3 * FieldMessageSerializer::kSTRING_HEADER_SIZE +
+                                           playerName.length() +
+                                           position.length() +
+                                           direction.length());
+    }
+    {
+        message.DeleteField(Field::Position);
+        assert(message.GetMessageSize() == FieldMessageSerializer::kHEADER_SIZE +
+                                           3 * FieldMessageSerializer::kINT_FIELD_SIZE +
+                                           2 * FieldMessageSerializer::kSTRING_HEADER_SIZE +
+                                           playerName.length() +
+                                           direction.length());
+    }
+    {
+        message.DeleteField(Field::TankHp);
+        assert(!message.Has(Field::TankHp));
+    }
 
     return 0;
 }
