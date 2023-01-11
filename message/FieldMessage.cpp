@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <atomic>
 #include "FieldMessage.h"
 
 void FieldMessage::SetIntField(FieldMessage::Field field, int32_t value) {
@@ -47,8 +48,7 @@ bool FieldMessage::Has(FieldMessage::Field field) const noexcept {
 }
 
 void FieldMessage::DeleteField(FieldMessage::Field field) {
-    auto found = fields_.find(field);
-    if (found != fields_.end()) {
+    if (auto found = fields_.find(field); found != fields_.end()) {
         if (IsStringField(field)) {
             messageSize_ -= (FieldMessage::kSTRING_HEADER_SIZE + get<std::string>(found->second).size());
         } else {
@@ -61,8 +61,8 @@ void FieldMessage::DeleteField(FieldMessage::Field field) {
 const size_t & FieldMessage::GetMessageSize() const { return messageSize_; }
 
 FieldMessage::FieldMessage() : messageSize_(FieldMessage::kHEADER_SIZE) {
-    static std::int64_t idNumber;
-    id_ = "message-" + std::to_string(idNumber++);
+    static std::atomic<std::int64_t> idNumber;
+    id_ = "message-" + std::to_string(idNumber.fetch_add(1));
 }
 
 FieldMessage::FieldMessage(BitMask bitMask) : FieldMessage() {
@@ -75,7 +75,7 @@ bool FieldMessage::IsStringField(FieldMessage::Field field) {
 
 bool FieldMessage::IsStringField(FieldMessage::BitMask mask) {
     auto field = static_cast<Field>(mask);
-    return field == Field::PlayerName || field == Field::Position || field == Field::Direction;
+    return FieldMessage::IsStringField(field);
 }
 
 FieldMessage::BitMask FieldMessage::GetBitmask() const { return bitMask_; }

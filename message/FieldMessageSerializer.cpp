@@ -32,8 +32,8 @@ FieldMessage FieldMessageSerializer::Deserialize(std::string &&serialized) {
     std::istringstream iss(serialized);
     std::uint64_t messageSize;
     FieldMessage::BitMask bitmask;
-    iss.read((char *)&messageSize, sizeof(messageSize));
-    iss.read((char *)&bitmask, sizeof(bitmask));
+    iss.read(reinterpret_cast<char *>(&messageSize), sizeof(messageSize));
+    iss.read(reinterpret_cast<char *>(&bitmask), sizeof(bitmask));
     FieldMessage message(bitmask);
 
     auto max = static_cast<int>(pow(2, 8));
@@ -43,20 +43,18 @@ FieldMessage FieldMessageSerializer::Deserialize(std::string &&serialized) {
             auto field = static_cast<FieldMessage::Field>(i);
             int8_t fieldType;
             // 127 or 0
-            iss.read((char *)&fieldType, sizeof(fieldType));
+            iss.read(reinterpret_cast<char *>(&fieldType), sizeof(fieldType));
             // If string field set
             if (FieldMessage::IsStringField(i)) {
                 int16_t length;
-                iss.read((char *)&length, sizeof(length));
-                char *str = new char[length];
-                iss.read(str, length);
-                std::string value(str);
+                iss.read(reinterpret_cast<char *>(&length), sizeof(length));
+                auto value = std::string(length, '\0');
+                iss.read(&value.at(0), length);
 
-                message.SetStringField(field, value.substr(0, length));
-                delete[] str;
+                message.SetStringField(field, value);
             } else {
                 int32_t value;
-                iss.read((char *)&value, sizeof(value));
+                iss.read(reinterpret_cast<char *>(&value), sizeof(value));
 
                 message.SetIntField(field, value);
             }
