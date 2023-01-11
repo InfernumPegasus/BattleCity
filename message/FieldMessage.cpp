@@ -32,15 +32,7 @@ int32_t FieldMessage::GetIntField(FieldMessage::Field field) const {
 }
 
 std::string FieldMessage::GetStringField(FieldMessage::Field field) const {
-    if (!fields_.contains(field)) {
-        throw std::logic_error("No such field!");
-    }
-    auto found = fields_.find(field);
-
-    if (std::holds_alternative<int32_t>(found->second)) {
-        throw std::logic_error("Wrong type!");
-    }
-    return std::get<std::string>(found->second);
+    return std::get<std::string>(fields_.find(field)->second);
 }
 
 bool FieldMessage::Has(FieldMessage::Field field) const noexcept {
@@ -74,8 +66,7 @@ bool FieldMessage::IsStringField(FieldMessage::Field field) {
 }
 
 bool FieldMessage::IsStringField(FieldMessage::BitMask mask) {
-    auto field = static_cast<Field>(mask);
-    return FieldMessage::IsStringField(field);
+    return FieldMessage::IsStringField(static_cast<Field>(mask));
 }
 
 FieldMessage::BitMask FieldMessage::GetBitmask() const { return bitMask_; }
@@ -100,6 +91,4 @@ bool FieldMessage::operator==(const FieldMessage &rhs) const {
            messageSize_ == rhs.messageSize_;
 }
 
-std::string_view FieldMessage::GetId() const {
-    return id_;
-}
+std::string_view FieldMessage::GetId() const { return id_; }
