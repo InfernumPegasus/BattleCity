@@ -15,7 +15,7 @@ public:
 public:
     static std::string Serialize(const FieldMessage &message);
 
-    static FieldMessage Deserialize(const std::string &serialized);
+    static FieldMessage Deserialize(std::string &&serialized);
 };
 
 

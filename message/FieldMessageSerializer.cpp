@@ -9,8 +9,8 @@ std::string FieldMessageSerializer::Serialize(const FieldMessage &message) {
     auto bitMask = message.GetBitmask();
     oss.write((char *)&messageSize, sizeof(messageSize));
     oss.write((char *)&bitMask, sizeof(bitMask));
-    for (const auto & pair : message.GetFields()) {
-        auto field = pair.first;
+    for (const auto & [first, _] : message.GetFields()) {
+        auto field = first;
         // If std::string field
         if (FieldMessage::IsStringField(field)) {
             oss.write((char *)&STRING_TYPE_CODE, sizeof(STRING_TYPE_CODE));
@@ -28,7 +28,7 @@ std::string FieldMessageSerializer::Serialize(const FieldMessage &message) {
     return oss.str();
 }
 
-FieldMessage FieldMessageSerializer::Deserialize(const std::string &serialized) {
+FieldMessage FieldMessageSerializer::Deserialize(std::string &&serialized) {
     std::istringstream iss(serialized);
     std::uint64_t messageSize;
     FieldMessage::BitMask bitmask;

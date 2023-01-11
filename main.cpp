@@ -21,20 +21,20 @@ int main() {
 
     FieldMessage message;
 
-    std::string_view playerName = "Vladimir";
-    std::string_view position = "22;58";
-    std::string_view direction = "DOWN!";
+    std::string playerName = "Vladimir";
+    std::string position = "22;58";
+    std::string direction = "DOWN";
 
     message.SetIntField(Field::TankSpeed, 255);
     message.SetIntField(Field::TankHp, 999);
     message.SetIntField(Field::ObstacleDurability, 3);
-    message.SetStringField(Field::PlayerName, playerName.data());
-    message.SetStringField(Field::Position, position.data());
-    message.SetStringField(Field::Direction, direction.data());
+    message.SetStringField(Field::PlayerName, playerName);
+    message.SetStringField(Field::Position, position);
+    message.SetStringField(Field::Direction, direction);
 
     {
         auto serialized = FieldMessageSerializer::Serialize(message);
-        auto deserialized = FieldMessageSerializer::Deserialize(serialized);
+        auto deserialized = FieldMessageSerializer::Deserialize(std::move(serialized));
 
         assert(message == deserialized);
 

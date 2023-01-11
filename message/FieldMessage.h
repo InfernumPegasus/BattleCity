@@ -29,26 +29,25 @@ public:
     explicit FieldMessage(BitMask bitMask);
 
     bool operator==(const FieldMessage &rhs) const;
-    bool operator!=(const FieldMessage &rhs) const;
 
 public:
     void SetIntField(Field field, int32_t value);
 
-    void SetStringField(Field field, const std::string &value);
+    void SetStringField(Field field, std::string value);
 
     [[nodiscard]] int32_t GetIntField(Field field) const;
 
     [[nodiscard]] std::string GetStringField(Field field) const;
 
-    [[nodiscard]] bool Has(Field field) const;
+    [[nodiscard]] bool Has(Field field) const noexcept;
 
     void DeleteField(Field field);
 
-    [[nodiscard]] std::uint64_t GetMessageSize() const;
+    [[nodiscard]] const size_t & GetMessageSize() const;
 
     [[nodiscard]] BitMask GetBitmask() const;
 
-    [[nodiscard]] std::map<Field, SupportedType> GetFields() const;
+    [[nodiscard]] const std::map<Field, SupportedType> & GetFields() const;
 
     static bool IsStringField(Field field);
 
@@ -61,9 +60,9 @@ public:
     [[nodiscard]] std::string_view GetId() const;
 
 private:
-    void SetBitmaskField(std::uint64_t bits);
+    void SetMaskBit(std::uint64_t bits);
 
-    void SetBitmaskField(Field bits);
+    void SetMaskBit(Field bits);
 
 private:
     // Map of fields
@@ -73,7 +72,7 @@ private:
     BitMask bitMask_ = 0B00'000'000;
 
     // Defines Field quantity (up to 64 in one message)
-    std::uint64_t messageSize_;
+    std::size_t messageSize_;
 
     // Unique message id
     std::string id_;
