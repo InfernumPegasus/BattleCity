@@ -69,7 +69,7 @@ private:
     std::map<Field, SupportedType> fields_;
 
     // Bit mask for fields
-    BitMask bitMask_ = 0B00'000'000;
+    BitMask bitMask_ = 0B0000'0000;
 
     // Defines Field quantity (up to 64 in one message)
     std::size_t messageSize_;
