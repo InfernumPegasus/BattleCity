@@ -1,5 +1,6 @@
 #include <cmath>
 #include <sstream>
+#include <cassert>
 #include "FieldMessageSerializer.h"
 
 std::string FieldMessageSerializer::Serialize(const FieldMessage &message) {
@@ -12,8 +13,7 @@ std::string FieldMessageSerializer::Serialize(const FieldMessage &message) {
 
     auto max = static_cast<int>(pow(2, 8));
     for (int i {1}; i <= max; i <<= 1) {
-        auto field = static_cast<FieldMessage::Field>(i);
-        if (message.Has(field)) {
+        if (auto field = static_cast<FieldMessage::Field>(i); message.HasField(field)) {
             if (FieldMessage::IsStringField(field)) {
                 oss.write((char *)&STRING_TYPE_CODE, sizeof(STRING_TYPE_CODE));
                 auto str = message.GetStringField(field);
@@ -31,9 +31,9 @@ std::string FieldMessageSerializer::Serialize(const FieldMessage &message) {
     return oss.str();
 }
 
-FieldMessage FieldMessageSerializer::Deserialize(std::string &&serialized) {
+FieldMessage FieldMessageSerializer::Deserialize(const std::string& serialized) {
     std::istringstream iss(serialized);
-    std::uint64_t messageSize;
+    std::size_t messageSize;
     FieldMessage::BitMask bitmask;
     iss.read(reinterpret_cast<char *>(&messageSize), sizeof(messageSize));
     iss.read(reinterpret_cast<char *>(&bitmask), sizeof(bitmask));
@@ -63,6 +63,8 @@ FieldMessage FieldMessageSerializer::Deserialize(std::string &&serialized) {
             }
         }
     }
+    assert(message.GetMessageSize() == messageSize);
+    assert(message.GetMessageSize() == serialized.size());
 
     return message;
 }
