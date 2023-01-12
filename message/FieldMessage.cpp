@@ -2,9 +2,24 @@
 #include <atomic>
 #include "FieldMessage.h"
 
+FieldMessage::FieldMessage() : messageSize_(FieldMessage::kHEADER_SIZE) {
+    static std::atomic<std::int64_t> idNumber;
+    id_ = "message-" + std::to_string(idNumber.fetch_add(1));
+}
+
+FieldMessage::FieldMessage(BitMask bitMask) : FieldMessage() {
+    bitMask_ = bitMask;
+}
+
+bool FieldMessage::operator==(const FieldMessage &rhs) const {
+    return fields_ == rhs.fields_ &&
+           bitMask_ == rhs.bitMask_ &&
+           messageSize_ == rhs.messageSize_;
+}
+
 void FieldMessage::SetIntField(FieldMessage::Field field, int32_t value) {
     // If field is not found
-    if (!Has(field) &&
+    if (!HasField(field) &&
         !IsStringField(field)) {
         fields_.emplace(field, value);
         SetMaskBit(field);
@@ -16,7 +31,7 @@ void FieldMessage::SetIntField(FieldMessage::Field field, int32_t value) {
 
 void FieldMessage::SetStringField(FieldMessage::Field field, std::string value) {
     // If field is not found
-    if (!Has(field) &&
+    if (!HasField(field) &&
         IsStringField(field)) {
         auto length = value.length();
         fields_.emplace(field, std::move(value));
@@ -35,7 +50,23 @@ std::string FieldMessage::GetStringField(FieldMessage::Field field) const {
     return std::get<std::string>(fields_.find(field)->second);
 }
 
-bool FieldMessage::Has(FieldMessage::Field field) const noexcept {
+const size_t & FieldMessage::GetMessageSize() const {
+    return messageSize_;
+}
+
+FieldMessage::BitMask FieldMessage::GetBitmask() const {
+    return bitMask_;
+}
+
+bool FieldMessage::GetBitmaskValue(std::uint64_t bits) const {
+    return bitMask_ & bits;
+}
+
+std::string_view FieldMessage::GetId() const {
+    return id_;
+}
+
+bool FieldMessage::HasField(FieldMessage::Field field) const noexcept {
     return fields_.contains(field);
 }
 
@@ -50,17 +81,6 @@ void FieldMessage::DeleteField(FieldMessage::Field field) {
     }
 }
 
-const size_t & FieldMessage::GetMessageSize() const { return messageSize_; }
-
-FieldMessage::FieldMessage() : messageSize_(FieldMessage::kHEADER_SIZE) {
-    static std::atomic<std::int64_t> idNumber;
-    id_ = "message-" + std::to_string(idNumber.fetch_add(1));
-}
-
-FieldMessage::FieldMessage(BitMask bitMask) : FieldMessage() {
-    bitMask_ = bitMask;
-}
-
 bool FieldMessage::IsStringField(FieldMessage::Field field) {
     return field == Field::PlayerName || field == Field::Position || field == Field::Direction;
 }
@@ -69,26 +89,10 @@ bool FieldMessage::IsStringField(FieldMessage::BitMask mask) {
     return FieldMessage::IsStringField(static_cast<Field>(mask));
 }
 
-FieldMessage::BitMask FieldMessage::GetBitmask() const { return bitMask_; }
-
-const std::unordered_map<FieldMessage::Field, FieldMessage::SupportedType> & FieldMessage::GetFields() const { return fields_; }
-
-bool FieldMessage::GetBitmaskValue(std::uint64_t bits) const { return bitMask_ & bits; }
-
-bool FieldMessage::GetBitmaskValue(FieldMessage::Field bits) const {
-    return GetBitmaskValue(static_cast<std::underlying_type_t<Field>>(bits));
+void FieldMessage::SetMaskBit(std::uint64_t bits) {
+    bitMask_ |= bits;
 }
-
-void FieldMessage::SetMaskBit(std::uint64_t bits) { bitMask_ |= bits; }
 
 void FieldMessage::SetMaskBit(FieldMessage::Field bits) {
     SetMaskBit(static_cast<std::underlying_type_t<Field>>(bits));
 }
-
-bool FieldMessage::operator==(const FieldMessage &rhs) const {
-    return fields_ == rhs.fields_ &&
-           bitMask_ == rhs.bitMask_ &&
-           messageSize_ == rhs.messageSize_;
-}
-
-std::string_view FieldMessage::GetId() const { return id_; }

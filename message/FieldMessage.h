@@ -30,38 +30,26 @@ public:
 
     bool operator==(const FieldMessage &rhs) const;
 
-public:
     void SetIntField(Field field, int32_t value);
-
     void SetStringField(Field field, std::string value);
 
     [[nodiscard]] int32_t GetIntField(Field field) const;
-
     [[nodiscard]] std::string GetStringField(Field field) const;
+    [[nodiscard]] const size_t & GetMessageSize() const;
+    [[nodiscard]] BitMask GetBitmask() const;
+    [[nodiscard]] bool GetBitmaskValue(std::uint64_t bits) const;
+    [[nodiscard]] std::string_view GetId() const;
 
-    [[nodiscard]] bool Has(Field field) const noexcept;
+    [[nodiscard]] bool HasField(Field field) const noexcept;
 
     void DeleteField(Field field);
 
-    [[nodiscard]] const size_t & GetMessageSize() const;
-
-    [[nodiscard]] BitMask GetBitmask() const;
-
-    [[nodiscard]] const std::unordered_map<Field, SupportedType> & GetFields() const;
-
     static bool IsStringField(Field field);
-
     static bool IsStringField(BitMask mask);
 
-    [[nodiscard]] bool GetBitmaskValue(std::uint64_t bits) const;
-
-    [[nodiscard]] bool GetBitmaskValue(Field bits) const;
-
-    [[nodiscard]] std::string_view GetId() const;
 
 private:
     void SetMaskBit(std::uint64_t bits);
-
     void SetMaskBit(Field bits);
 
 private:
