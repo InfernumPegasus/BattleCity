@@ -31,13 +31,18 @@ std::string FieldMessageSerializer::Serialize(const FieldMessage &message) {
     return oss.str();
 }
 
-FieldMessage FieldMessageSerializer::Deserialize(const std::string& serialized) {
+FieldMessage FieldMessageSerializer::Deserialize(std::string &serialized) {
     std::istringstream iss(serialized);
     std::size_t messageSize;
     FieldMessage::BitMask bitmask;
     iss.read(reinterpret_cast<char *>(&messageSize), sizeof(messageSize));
     iss.read(reinterpret_cast<char *>(&bitmask), sizeof(bitmask));
     FieldMessage message(bitmask);
+
+    if (bitmask == 0) {
+        assert(messageSize == FieldMessage::kHEADER_SIZE);
+        return message;
+    }
 
     auto max = static_cast<int>(pow(2, 8));
     for (int i {1}; i <= max; i <<= 1) {
@@ -47,6 +52,7 @@ FieldMessage FieldMessageSerializer::Deserialize(const std::string& serialized) 
             int8_t fieldType;
             // 127 or 0
             iss.read(reinterpret_cast<char *>(&fieldType), sizeof(fieldType));
+            assert(fieldType == INT32_TYPE_CODE || fieldType == STRING_TYPE_CODE);
             // If string field set
             if (FieldMessage::IsStringField(i)) {
                 int16_t length;
