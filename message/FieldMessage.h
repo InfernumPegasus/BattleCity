@@ -2,7 +2,7 @@
 #define BATTLECITY_FIELDMESSAGE_H
 
 #include <variant>
-#include <map>
+#include <unordered_map>
 #include <string>
 
 class FieldMessage {
@@ -47,7 +47,7 @@ public:
 
     [[nodiscard]] BitMask GetBitmask() const;
 
-    [[nodiscard]] const std::map<Field, SupportedType> & GetFields() const;
+    [[nodiscard]] const std::unordered_map<Field, SupportedType> & GetFields() const;
 
     static bool IsStringField(Field field);
 
@@ -66,7 +66,7 @@ private:
 
 private:
     // Map of fields
-    std::map<Field, SupportedType> fields_;
+    std::unordered_map<Field, SupportedType> fields_;
 
     // Bit mask for fields
     BitMask bitMask_ = 0B0000'0000;

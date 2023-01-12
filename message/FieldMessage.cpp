@@ -71,7 +71,7 @@ bool FieldMessage::IsStringField(FieldMessage::BitMask mask) {
 
 FieldMessage::BitMask FieldMessage::GetBitmask() const { return bitMask_; }
 
-const std::map<FieldMessage::Field, FieldMessage::SupportedType> & FieldMessage::GetFields() const { return fields_; }
+const std::unordered_map<FieldMessage::Field, FieldMessage::SupportedType> & FieldMessage::GetFields() const { return fields_; }
 
 bool FieldMessage::GetBitmaskValue(std::uint64_t bits) const { return bitMask_ & bits; }
 
