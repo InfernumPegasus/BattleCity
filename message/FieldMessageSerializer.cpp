@@ -7,21 +7,24 @@ std::string FieldMessageSerializer::Serialize(const FieldMessage &message) {
 
     auto messageSize = message.GetMessageSize();
     auto bitMask = message.GetBitmask();
-    oss.write((char *)&messageSize, sizeof(messageSize));
-    oss.write((char *)&bitMask, sizeof(bitMask));
-    for (const auto & [first, _] : message.GetFields()) {
-        auto field = first;
-        // If std::string field
-        if (FieldMessage::IsStringField(field)) {
-            oss.write((char *)&STRING_TYPE_CODE, sizeof(STRING_TYPE_CODE));
-            auto str = message.GetStringField(field);
-            auto length = static_cast<int16_t>(str.length());
-            oss.write((char *)&length, sizeof(length));
-            oss.write(str.c_str(), length);
-        } else {
-            oss.write((char *)&INT32_TYPE_CODE, sizeof(INT32_TYPE_CODE));
-            auto value = message.GetIntField(field);
-            oss.write((char *)&value, sizeof(value));
+    oss.write(reinterpret_cast<char *>(&messageSize), sizeof(messageSize));
+    oss.write(reinterpret_cast<char *>(&bitMask), sizeof(bitMask));
+
+    auto max = static_cast<int>(pow(2, 8));
+    for (int i {1}; i <= max; i <<= 1) {
+        auto field = static_cast<FieldMessage::Field>(i);
+        if (message.Has(field)) {
+            if (FieldMessage::IsStringField(field)) {
+                oss.write((char *)&STRING_TYPE_CODE, sizeof(STRING_TYPE_CODE));
+                auto str = message.GetStringField(field);
+                auto length = static_cast<int16_t>(str.length());
+                oss.write(reinterpret_cast<char *>(&length), sizeof(length));
+                oss.write(str.c_str(), length);
+            } else {
+                oss.write((char *)&INT32_TYPE_CODE, sizeof(INT32_TYPE_CODE));
+                auto value = message.GetIntField(field);
+                oss.write(reinterpret_cast<char *>(&value), sizeof(value));
+            }
         }
     }
 
