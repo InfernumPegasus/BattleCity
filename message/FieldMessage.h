@@ -5,6 +5,11 @@
 #include <unordered_map>
 #include <string>
 
+/*
+ * А message class that describes the parameters of entities from the BattleCity game.
+ * Each parameter is described by enum flag in nested class Field
+ * and can contain either std::string' either std::uint64_t' type value (immutable).
+ */
 class FieldMessage {
 public:
     // Defines field attributes
@@ -32,6 +37,7 @@ public:
 
     void SetIntField(Field field, int32_t value);
     void SetStringField(Field field, std::string value);
+    static bool IsValidField(Field field);
 
     [[nodiscard]] int32_t GetIntField(Field field) const;
     [[nodiscard]] std::string GetStringField(Field field) const;
