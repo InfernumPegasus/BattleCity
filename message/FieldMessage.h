@@ -65,7 +65,7 @@ private:
     // Bit mask for fields
     BitMask bitMask_ = 0B0000'0000;
 
-    // Defines Field quantity (up to 64 in one message)
+    // Defines message size in bytes
     std::size_t messageSize_;
 
     // Unique message id
