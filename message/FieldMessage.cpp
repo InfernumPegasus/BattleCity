@@ -1,6 +1,5 @@
 #include <stdexcept>
 #include <atomic>
-#include <cassert>
 #include "FieldMessage.h"
 
 FieldMessage::FieldMessage() : messageSize_(FieldMessage::kHEADER_SIZE) {
@@ -19,7 +18,9 @@ bool FieldMessage::operator==(const FieldMessage &rhs) const {
 }
 
 void FieldMessage::SetIntField(FieldMessage::Field field, int32_t value) {
-    assert(IsValidField(field));
+    if (!IsValidField(field)) {
+        throw std::runtime_error("Invalid field!");
+    }
     // If field is not found
     if (!HasField(field) &&
         !IsStringField(field)) {
@@ -32,7 +33,9 @@ void FieldMessage::SetIntField(FieldMessage::Field field, int32_t value) {
 }
 
 void FieldMessage::SetStringField(FieldMessage::Field field, std::string value) {
-    assert(IsValidField(field));
+    if (!IsValidField(field)) {
+        throw std::runtime_error("Invalid field!");
+    }
     // If field is not found
     if (!HasField(field) &&
         IsStringField(field)) {
@@ -55,12 +58,16 @@ bool FieldMessage::IsValidField(FieldMessage::Field field) {
 }
 
 int32_t FieldMessage::GetIntField(FieldMessage::Field field) const {
-    assert(IsValidField(field));
+    if (!IsValidField(field)) {
+        throw std::runtime_error("Invalid field!");
+    }
     return std::get<int32_t>(fields_.find(field)->second);
 }
 
 std::string FieldMessage::GetStringField(FieldMessage::Field field) const {
-    assert(IsValidField(field));
+    if (!IsValidField(field)) {
+        throw std::runtime_error("Invalid field!");
+    }
     return std::get<std::string>(fields_.find(field)->second);
 }
 
@@ -88,7 +95,9 @@ bool FieldMessage::HasField(FieldMessage::Field field) const noexcept {
 }
 
 void FieldMessage::DeleteField(FieldMessage::Field field) {
-    assert(IsValidField(field));
+    if (!IsValidField(field)) {
+        throw std::runtime_error("Invalid field!");
+    }
     if (auto found = fields_.find(field); found != fields_.end()) {
         if (IsStringField(field)) {
             messageSize_ -= (FieldMessage::kSTRING_HEADER_SIZE + get<std::string>(found->second).size());
