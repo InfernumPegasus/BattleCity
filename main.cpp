@@ -34,7 +34,7 @@ int main() {
 
     {
         auto serialized = FieldMessageSerializer::Serialize(message);
-        auto deserialized = FieldMessageSerializer::Deserialize(std::move(serialized));
+        auto deserialized = FieldMessageSerializer::Deserialize(serialized);
 
         assert(message == deserialized);
 
@@ -58,7 +58,7 @@ int main() {
     }
     {
         message.DeleteField(Field::TankHp);
-        assert(!message.Has(Field::TankHp));
+        assert(!message.HasField(Field::TankHp));
     }
 
     std::cout << "All tests passed!" << std::endl;
