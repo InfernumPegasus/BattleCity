@@ -1,6 +1,5 @@
 #include <cmath>
 #include <sstream>
-#include <cassert>
 #include "FieldMessageSerializer.h"
 
 std::string FieldMessageSerializer::Serialize(const FieldMessage &message) {
@@ -31,7 +30,7 @@ std::string FieldMessageSerializer::Serialize(const FieldMessage &message) {
     return oss.str();
 }
 
-FieldMessage FieldMessageSerializer::Deserialize(std::string &serialized) {
+FieldMessage FieldMessageSerializer::Deserialize(const std::string &serialized) {
     std::istringstream iss(serialized);
     std::size_t messageSize;
     FieldMessage::BitMask bitmask;
@@ -39,8 +38,7 @@ FieldMessage FieldMessageSerializer::Deserialize(std::string &serialized) {
     iss.read(reinterpret_cast<char *>(&bitmask), sizeof(bitmask));
     FieldMessage message(bitmask);
 
-    if (bitmask == 0) {
-        assert(messageSize == FieldMessage::kHEADER_SIZE);
+    if (bitmask == 0 && messageSize == FieldMessage::kHEADER_SIZE) {
         return message;
     }
 
@@ -50,9 +48,11 @@ FieldMessage FieldMessageSerializer::Deserialize(std::string &serialized) {
         if (message.GetBitmaskValue(i)) {
             auto field = static_cast<FieldMessage::Field>(i);
             int8_t fieldType;
-            // 127 or 0
+            // INT32_TYPE_CODE or STRING_TYPE_CODE
             iss.read(reinterpret_cast<char *>(&fieldType), sizeof(fieldType));
-            assert(fieldType == INT32_TYPE_CODE || fieldType == STRING_TYPE_CODE);
+            if (fieldType != INT32_TYPE_CODE && fieldType != STRING_TYPE_CODE) {
+                throw std::runtime_error("Cannot identify field type!");
+            }
             // If string field set
             if (FieldMessage::IsStringField(i)) {
                 int16_t length;
@@ -69,8 +69,10 @@ FieldMessage FieldMessageSerializer::Deserialize(std::string &serialized) {
             }
         }
     }
-    assert(message.GetMessageSize() == messageSize);
-    assert(message.GetMessageSize() == serialized.size());
+
+    if (message.GetMessageSize() != messageSize && message.GetMessageSize() != serialized.size()) {
+        throw std::runtime_error("Wrong message size!");
+    }
 
     return message;
 }

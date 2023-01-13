@@ -25,7 +25,12 @@ public:
      */
     static std::string Serialize(const FieldMessage &message);
 
-    static FieldMessage Deserialize(std::string &serialized);
+    /*
+     * Creates FieldMessage object from serialized string
+     * and fulfills all serialized fields. If serialized
+     * string is not correct throws exception.
+     */
+    static FieldMessage Deserialize(const std::string &serialized);
 };
 
 
