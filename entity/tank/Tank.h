@@ -6,6 +6,7 @@
 class Tank {
 public:
     Tank(double speed, int hp);
+    virtual ~Tank();
 
 public:
     [[nodiscard]] double GetSpeed() const;

@@ -9,6 +9,8 @@ public:
             GameObject(position),
             Tank(speed, HEAVY_TANK_HP) {}
 
+    ~HeavyTank() override;
+
 public:
     void MoveUp() override;
     void MoveDown() override;

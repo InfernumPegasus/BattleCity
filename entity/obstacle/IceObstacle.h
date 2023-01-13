@@ -14,6 +14,8 @@ public:
             GameObject(position),
             Obstacle(true, true, false) {}
 
+   ~IceObstacle() override;
+
 public:
     void CollideWith(const GameObject &obj) override;
 

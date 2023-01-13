@@ -9,6 +9,8 @@ public:
             GameObject(position),
             Tank(speed, LIGHT_TANK_HP) {}
 
+    ~LightTank() override;
+
 public:
     void MoveUp() override;
     void MoveDown() override;

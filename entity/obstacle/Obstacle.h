@@ -9,6 +9,7 @@ class Obstacle {
 public:
     explicit Obstacle(const ObstacleProperties &properties);
     Obstacle(bool tankPassable, bool projectilePassable, bool tankVisionDisabling);
+    virtual ~Obstacle();
 
 public:
     [[nodiscard]] ObstacleProperties GetProperties() const;

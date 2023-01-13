@@ -18,6 +18,8 @@ public:
             GameObject(x, y),
             Obstacle(false, true, false) {}
 
+    ~WaterObstacle() override;
+
 public:
     void CollideWith(const GameObject &obj) override;
     void CollideWith(const Projectile &projectile) override;

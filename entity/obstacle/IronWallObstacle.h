@@ -16,6 +16,8 @@ public:
             GameObject(position),
             WallObstacle(false, false, true, IRON_WALL_DURABILITY) {}
 
+    ~IronWallObstacle() override;
+
 public:
     void CollideWith(const GameObject &obj) override;
     void CollideWith(const Projectile &projectile) override;
