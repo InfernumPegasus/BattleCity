@@ -17,7 +17,7 @@ add_executable(BattleCity
 add_executable(Tests
         message/FieldMessage.cpp
         message/FieldMessageSerializer.cpp
-        tests/FieldMessageTests.cpp)
+        tests/FieldMessageFixture.cpp)
 
 #Link with GTests 'main' function
 target_link_libraries(Tests gtest gtest_main)
