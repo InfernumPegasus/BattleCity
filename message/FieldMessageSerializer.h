@@ -10,6 +10,8 @@ public:
     static constexpr int8_t INT32_TYPE_CODE = 0;
     static constexpr int8_t STRING_TYPE_CODE = 127;
 
+    static constexpr auto MAX_FIELD = sizeof(std::size_t);
+
 public:
     FieldMessageSerializer() = delete;
 

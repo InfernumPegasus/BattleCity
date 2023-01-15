@@ -10,7 +10,7 @@ std::string FieldMessageSerializer::Serialize(const FieldMessage &message) {
     oss.write(reinterpret_cast<char *>(&messageSize), sizeof(messageSize));
     oss.write(reinterpret_cast<char *>(&bitMask), sizeof(bitMask));
 
-    auto max = static_cast<int>(pow(2, 8));
+    auto max = static_cast<int>(pow(2, MAX_FIELD));
     for (int i {1}; i <= max; i <<= 1) {
         if (auto field = static_cast<FieldMessage::Field>(i); message.HasField(field)) {
             if (FieldMessage::IsStringField(field)) {
@@ -42,7 +42,7 @@ FieldMessage FieldMessageSerializer::Deserialize(const std::string &serialized) 
         return message;
     }
 
-    auto max = static_cast<int>(pow(2, 8));
+    auto max = static_cast<int>(pow(2, MAX_FIELD));
     for (int i {1}; i <= max; i <<= 1) {
         // If flag field set
         if (message.GetBitmaskValue(i)) {
