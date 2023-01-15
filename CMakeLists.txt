@@ -3,6 +3,21 @@ project(BattleCity)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_executable(BattleCity message/FieldMessage.cpp main.cpp
-        message/FieldMessage.h message/FieldMessage.cpp
-        message/FieldMessageSerializer.h message/FieldMessageSerializer.cpp)
+#Folders required for tests
+add_subdirectory(tests/lib/googletest)
+include_directories(tests/lib/googletest/googletest/include)
+
+#Main project files
+add_executable(BattleCity
+        main.cpp
+        message/FieldMessage.cpp
+        message/FieldMessageSerializer.cpp)
+
+#Tests
+add_executable(Tests
+        message/FieldMessage.cpp
+        message/FieldMessageSerializer.cpp
+        tests/FieldMessageTests.cpp)
+
+#Link with GTests 'main' function
+target_link_libraries(Tests gtest gtest_main)
