@@ -41,7 +41,7 @@ public:
 
     [[nodiscard]] int32_t GetIntField(Field field) const;
     [[nodiscard]] std::string GetStringField(Field field) const;
-    [[nodiscard]] const size_t & GetMessageSize() const;
+    [[nodiscard]] size_t GetMessageSize() const;
     [[nodiscard]] BitMask GetBitmask() const;
     [[nodiscard]] bool GetBitmaskValue(std::uint64_t bits) const;
     [[nodiscard]] std::string_view GetId() const;

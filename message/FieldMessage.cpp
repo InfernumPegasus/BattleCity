@@ -71,7 +71,7 @@ std::string FieldMessage::GetStringField(FieldMessage::Field field) const {
     return std::get<std::string>(fields_.find(field)->second);
 }
 
-const size_t & FieldMessage::GetMessageSize() const {
+size_t FieldMessage::GetMessageSize() const {
     return messageSize_;
 }
 
