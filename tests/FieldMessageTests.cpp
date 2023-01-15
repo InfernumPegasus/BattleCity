@@ -79,3 +79,10 @@ TEST(MessageModificationTests, AddInvalidParameterTypeTest) {
     EXPECT_ANY_THROW(message.SetIntField(Field::PlayerName, 93));
     EXPECT_ANY_THROW(message.SetStringField(Field::TankHp, "30"));
 }
+
+TEST(MessageModificationTests, UniqueIdsTest) {
+    FieldMessage message1;
+    FieldMessage message2;
+
+    EXPECT_FALSE(message1.GetId() == message2.GetId());
+}
