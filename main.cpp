@@ -1,7 +1,4 @@
-#include <cassert>
 #include <iostream>
-#include "message/FieldMessage.h"
-#include "message/FieldMessageSerializer.h"
 
 /*
     Разработать класс сообщения, которое представляет из себя набор полей.
