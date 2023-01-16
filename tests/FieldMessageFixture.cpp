@@ -7,7 +7,6 @@
 using Field = FieldMessage::Field;
 
 class FieldMessageFixture : public ::testing::Test {
-
 public:
     ~FieldMessageFixture() override {
         delete message;
@@ -22,8 +21,7 @@ protected:
 };
 
 
-TEST_F(FieldMessageFixture, SerializedSizeTest) {
-
+TEST_F(FieldMessageFixture, SerializedSize) {
     message->SetIntField(Field::TankSpeed, 255);
     message->SetIntField(Field::TankHp, 999);
     message->SetIntField(Field::ObstacleDurability, 3);
@@ -36,7 +34,7 @@ TEST_F(FieldMessageFixture, SerializedSizeTest) {
     EXPECT_EQ(message->GetMessageSize(), serialized.size());
 }
 
-TEST_F(FieldMessageFixture, DeserializedEqualityTest) {
+TEST_F(FieldMessageFixture, DeserializedEquality) {
     message->SetIntField(Field::TankSpeed, 255);
     message->SetIntField(Field::ObstacleDurability, 3);
     message->SetStringField(Field::Direction, "22;58");
@@ -48,11 +46,11 @@ TEST_F(FieldMessageFixture, DeserializedEqualityTest) {
     EXPECT_EQ(*message, deserialized);
 }
 
-TEST_F(FieldMessageFixture, EmptyMessageSizeTest) {
+TEST_F(FieldMessageFixture, EmptyMessageSize) {
     EXPECT_EQ(message->GetMessageSize(), FieldMessage::kHEADER_SIZE);
 }
 
-TEST_F(FieldMessageFixture, FilledMessageSizeTest) {
+TEST_F(FieldMessageFixture, FilledMessageSize) {
     std::string playerName = "Vladimir";
     std::string position = "22;58";
     std::string direction = "DOWN";
@@ -82,20 +80,22 @@ TEST_F(FieldMessageFixture, FilledMessageSizeTest) {
               direction.length());
 }
 
-TEST_F(FieldMessageFixture, AddInvalidFieldTest) {
-    EXPECT_ANY_THROW(message->SetIntField(static_cast<Field>(0b00000000), 10));
+TEST_F(FieldMessageFixture, AddInvalidField) {
+    EXPECT_ANY_THROW(message->SetIntField(static_cast<Field>(0b0000'0000'0000), 10));
+    EXPECT_ANY_THROW(message->SetIntField(static_cast<Field>(0b1000'0000'0000), 10));
+    EXPECT_ANY_THROW(message->SetIntField(static_cast<Field>(0b0000'0000'1100), 10));
+    EXPECT_ANY_THROW(message->SetIntField(static_cast<Field>(0b1000'0010'0011), 10));
 }
 
-TEST_F(FieldMessageFixture, AddInvalidParameterTypeTest) {
+TEST_F(FieldMessageFixture, AddInvalidParameterType) {
     EXPECT_ANY_THROW(message->SetIntField(Field::PlayerName, 93));
     EXPECT_ANY_THROW(message->SetStringField(Field::TankHp, "30"));
 }
 
-TEST_F(FieldMessageFixture, UniqueIdsTest) {
+TEST_F(FieldMessageFixture, UniqueIds) {
     FieldMessage other;
-    EXPECT_FALSE(message->GetId() == other.GetId());
+    EXPECT_NE(message->GetId(), other.GetId());
 }
-
 
 
 #endif //BATTLECITY_FIELDMESSAGEFIXTURE_CPP
