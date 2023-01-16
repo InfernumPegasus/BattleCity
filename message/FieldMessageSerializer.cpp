@@ -1,10 +1,8 @@
-#include <cmath>
 #include <sstream>
 #include "FieldMessageSerializer.h"
 
 std::string FieldMessageSerializer::Serialize(const FieldMessage &message) {
     std::ostringstream oss;
-
     auto messageSize = message.GetMessageSize();
     auto bitMask = message.GetBitmask();
     oss.write(reinterpret_cast<char *>(&messageSize), sizeof(messageSize));
