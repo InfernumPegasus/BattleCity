@@ -5,12 +5,17 @@
 
 // Serializer for FieldMessage class
 class FieldMessageSerializer {
-
 public:
-    static constexpr int8_t INT32_TYPE_CODE = 0;
-    static constexpr int8_t STRING_TYPE_CODE = 127;
+    static constexpr int8_t kINT32_TYPE_CODE = 0;
+    static constexpr int8_t kSTRING_TYPE_CODE = 127;
 
-    static constexpr auto MAX_FIELD = sizeof(std::size_t);
+private:
+    /*
+     * Represents maximum fields number in bitmask (bitmask length).
+     * Each bit stands for some field, so that maximum bitmask
+     * value for certain field is 0b111...111 (64 non-zero bits).
+     */
+    static constexpr auto kBITMASK_LENGTH_BYTES = sizeof(std::size_t) * 8;
 
 public:
     FieldMessageSerializer() = delete;
