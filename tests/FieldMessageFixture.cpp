@@ -48,6 +48,7 @@ TEST_F(FieldMessageFixture, DeserializedEquality) {
 
 TEST_F(FieldMessageFixture, EmptyMessageSize) {
     EXPECT_EQ(message->GetMessageSize(), FieldMessage::kHEADER_SIZE);
+    EXPECT_EQ(message->GetBitmask(), 0);
 }
 
 TEST_F(FieldMessageFixture, FilledMessageSize) {
