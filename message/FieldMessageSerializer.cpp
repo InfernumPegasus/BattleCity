@@ -10,9 +10,9 @@ std::string FieldMessageSerializer::Serialize(const FieldMessage &message) {
 
     for (int val {1}, pos {1}; pos <= kBITMASK_LENGTH_BYTES; val <<= 1, pos++) {
         auto field = static_cast<FieldMessage::Field>(val);
-        if (!FieldMessage::IsValidField(field)) {
+        if (!FieldMessage::IsValidField(field))
             break;
-        }
+
         if (message.HasField(field)) {
             if (FieldMessage::IsStringField(field)) {
                 oss.write((char *)&kSTRING_TYPE_CODE, sizeof(kSTRING_TYPE_CODE));
@@ -39,22 +39,21 @@ FieldMessage FieldMessageSerializer::Deserialize(const std::string &serialized) 
     iss.read(reinterpret_cast<char *>(&bitmask), sizeof(bitmask));
     FieldMessage message(bitmask);
 
-    if (bitmask == 0 && messageSize == FieldMessage::kHEADER_SIZE) {
+    if (bitmask == 0 && messageSize == FieldMessage::kHEADER_SIZE)
         return message;
-    }
 
     for (int val {1}, pos {1}; pos <= kBITMASK_LENGTH_BYTES; val <<= 1, pos++) {
         // If flag field set
         if (message.GetBitmaskValue(val)) {
             auto field = static_cast<FieldMessage::Field>(val);
-            if (!FieldMessage::IsValidField(field)) {
+            if (!FieldMessage::IsValidField(field))
                 throw std::runtime_error("Wrong serialized string provided!");
-            }
+
             int8_t fieldType;
             iss.read(reinterpret_cast<char *>(&fieldType), sizeof(fieldType));
-            if (fieldType != kINT32_TYPE_CODE && fieldType != kSTRING_TYPE_CODE) {
+            if (fieldType != kINT32_TYPE_CODE && fieldType != kSTRING_TYPE_CODE)
                 throw std::runtime_error("Cannot identify field type!");
-            }
+
             // If string field set
             if (FieldMessage::IsStringField(val)) {
                 int16_t length;
@@ -72,9 +71,8 @@ FieldMessage FieldMessageSerializer::Deserialize(const std::string &serialized) 
         }
     }
 
-    if (message.GetMessageSize() != messageSize && message.GetMessageSize() != serialized.size()) {
+    if (message.GetMessageSize() != messageSize && message.GetMessageSize() != serialized.size())
         throw std::runtime_error("Wrong message size!");
-    }
 
     return message;
 }
