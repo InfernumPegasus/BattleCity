@@ -9,9 +9,7 @@ include_directories(tests/lib/googletest/googletest/include)
 
 #Main project files
 add_executable(BattleCity
-        main.cpp
-        message/FieldMessage.cpp
-        message/FieldMessageSerializer.cpp)
+        main.cpp)
 
 #Tests
 add_executable(Tests
