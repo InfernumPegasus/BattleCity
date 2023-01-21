@@ -13,13 +13,13 @@
 class FieldMessage {
 public:
     // Defines field attributes
-    enum class Field : std::uint64_t {
-        PlayerName          = 0B00000001,       // Only std::string
-        Position            = 0B00000010,       // Only std::string
-        Direction           = 0B00000100,       // Only std::string
-        TankSpeed           = 0B00001000,       // Only std::uint64_t
-        TankHp              = 0B00010000,       // Only std::uint64_t
-        ObstacleDurability  = 0B00100000        // Only std::uint64_t
+    enum class Field : uint64_t {
+        PlayerName          = 0B0000'0001,       // Only std::string
+        Position            = 0B0000'0010,       // Only std::string
+        Direction           = 0B0000'0100,       // Only std::string
+        TankSpeed           = 0B0000'1000,       // Only uint64_t
+        TankHp              = 0B0001'0000,       // Only uint64_t
+        ObstacleDurability  = 0B0010'0000        // Only uint64_t
     };
 
     using BitMask = std::underlying_type_t<Field>;
@@ -43,7 +43,7 @@ public:
     [[nodiscard]] std::string GetStringField(Field field) const;
     [[nodiscard]] size_t GetMessageSize() const;
     [[nodiscard]] BitMask GetBitmask() const;
-    [[nodiscard]] bool GetBitmaskValue(std::uint64_t bits) const;
+    [[nodiscard]] bool GetBitmaskValue(uint64_t bits) const;
     [[nodiscard]] std::string_view GetId() const;
 
     [[nodiscard]] bool HasField(Field field) const noexcept;
@@ -55,7 +55,7 @@ public:
 
 
 private:
-    void SetMaskBit(std::uint64_t bits);
+    void SetMaskBit(uint64_t bits);
     void SetMaskBit(Field bits);
 
 private:

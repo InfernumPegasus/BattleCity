@@ -3,7 +3,7 @@
 #include "FieldMessage.h"
 
 FieldMessage::FieldMessage() : messageSize_(FieldMessage::kHEADER_SIZE) {
-    static std::atomic<std::int64_t> idNumber;
+    static std::atomic<int64_t> idNumber;
     id_ = "message-" + std::to_string(idNumber.fetch_add(1));
 }
 
@@ -73,7 +73,7 @@ FieldMessage::BitMask FieldMessage::GetBitmask() const {
     return bitMask_;
 }
 
-bool FieldMessage::GetBitmaskValue(std::uint64_t bits) const {
+bool FieldMessage::GetBitmaskValue(uint64_t bits) const {
     return bitMask_ & bits;
 }
 
@@ -108,7 +108,7 @@ bool FieldMessage::IsStringField(FieldMessage::BitMask mask) {
     return FieldMessage::IsStringField(static_cast<Field>(mask));
 }
 
-void FieldMessage::SetMaskBit(std::uint64_t bits) {
+void FieldMessage::SetMaskBit(uint64_t bits) {
     bitMask_ |= bits;
 }
 

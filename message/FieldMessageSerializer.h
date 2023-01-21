@@ -15,7 +15,7 @@ private:
      * Each bit stands for some field, so that maximum bitmask
      * value for certain field is 0b111...111 (64 non-zero bits).
      */
-    static constexpr auto kBITMASK_LENGTH_BYTES = sizeof(std::size_t) * 8;
+    static constexpr auto kBITMASK_LENGTH_BYTES = sizeof(size_t) * 8;
 
 public:
     FieldMessageSerializer() = delete;
