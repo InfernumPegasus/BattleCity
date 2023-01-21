@@ -8,7 +8,7 @@ std::string FieldMessageSerializer::Serialize(const FieldMessage &message) {
     oss.write(reinterpret_cast<char *>(&messageSize), sizeof(messageSize));
     oss.write(reinterpret_cast<char *>(&bitMask), sizeof(bitMask));
 
-    for (int val {1}, pos {1}; pos <= kBITMASK_LENGTH_BYTES; val <<= 1, pos++) {
+    for (auto val {1L}, pos {1L}; pos <= kBITMASK_LENGTH_BYTES; val <<= 1, pos++) {
         auto field = static_cast<FieldMessage::Field>(val);
         if (!FieldMessage::IsValidField(field))
             break;
@@ -42,7 +42,7 @@ FieldMessage FieldMessageSerializer::Deserialize(const std::string &serialized) 
     if (bitmask == 0 && messageSize == FieldMessage::kHEADER_SIZE)
         return message;
 
-    for (int val {1}, pos {1}; pos <= kBITMASK_LENGTH_BYTES; val <<= 1, pos++) {
+    for (auto val {1L}, pos {1L}; pos <= kBITMASK_LENGTH_BYTES; val <<= 1, pos++) {
         // If flag field set
         if (message.GetBitmaskValue(val)) {
             auto field = static_cast<FieldMessage::Field>(val);
