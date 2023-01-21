@@ -99,8 +99,6 @@ void FieldMessage::DeleteField(FieldMessage::Field field) {
 }
 
 bool FieldMessage::IsStringField(FieldMessage::Field field) {
-    if (!IsValidField(field))
-        return false;
     return field == Field::PlayerName || field == Field::Position || field == Field::Direction;
 }
 
