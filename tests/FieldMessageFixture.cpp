@@ -52,16 +52,16 @@ TEST_F(FieldMessageFixture, EmptyMessageSize) {
 }
 
 TEST_F(FieldMessageFixture, FilledMessageSize) {
-    std::string playerName = "Vladimir";
-    std::string position = "22;58";
-    std::string direction = "DOWN";
+    std::string_view playerName = "Vladimir";
+    std::string_view position = "22;58";
+    std::string_view direction = "DOWN";
 
     message->SetIntField(Field::TankSpeed, 255);
     message->SetIntField(Field::TankHp, 999);
     message->SetIntField(Field::ObstacleDurability, 3);
-    message->SetStringField(Field::PlayerName, playerName);
-    message->SetStringField(Field::Position, position);
-    message->SetStringField(Field::Direction, direction);
+    message->SetStringField(Field::PlayerName, playerName.data());
+    message->SetStringField(Field::Position, position.data());
+    message->SetStringField(Field::Direction, direction.data());
 
     EXPECT_EQ(message->GetMessageSize(),
               FieldMessage::kHEADER_SIZE +
